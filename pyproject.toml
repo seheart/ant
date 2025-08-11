@@ -1,0 +1,101 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ant-ai"
+dynamic = ["version"]
+description = "Adaptive Neural Terminal - Your personal AI assistant that learns with you"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+keywords = ["ai", "assistant", "cli", "llama", "personalization"]
+authors = [
+  { name = "Seth", email = "seth@example.com" },
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+  "rich>=13.0.0",
+  "click>=8.0.0",
+  "requests>=2.28.0",
+  "pydantic>=2.0.0",
+  "sqlalchemy>=2.0.0",
+  "ollama>=0.1.0",
+  "gitpython>=3.1.0",
+  "tree-sitter>=0.20.0",
+  "pyyaml>=6.0.0",
+]
+
+[project.optional-dependencies]
+training = [
+  "torch>=2.0.0",
+  "transformers>=4.30.0",
+  "datasets>=2.10.0",
+  "accelerate>=0.20.0",
+  "peft>=0.4.0",
+  "unsloth[cu118]>=2024.1.0",
+]
+dev = [
+  "pytest>=7.0.0",
+  "pytest-asyncio>=0.21.0",
+  "black>=23.0.0",
+  "isort>=5.12.0",
+  "mypy>=1.4.0",
+  "ruff>=0.0.270",
+]
+
+[project.scripts]
+ant = "ant.cli.main:main"
+
+[project.urls]
+Documentation = "https://github.com/seheart/ant#readme"
+Issues = "https://github.com/seheart/ant/issues"
+Source = "https://github.com/seheart/ant"
+
+[tool.hatch.version]
+path = "src/ant/__about__.py"
+
+[tool.hatch.envs.default]
+dependencies = [
+  "coverage[toml]>=6.5",
+  "pytest",
+]
+
+[tool.hatch.envs.default.scripts]
+test = "pytest {args:tests}"
+test-cov = "coverage run -m pytest {args:tests}"
+cov-report = [
+  "- coverage combine",
+  "coverage report",
+]
+cov = [
+  "test-cov",
+  "cov-report",
+]
+
+[[tool.hatch.envs.all.matrix]]
+python = ["3.10", "3.11", "3.12"]
+
+[tool.black]
+target-version = ["py310"]
+line-length = 88
+
+[tool.isort]
+profile = "black"
+known_first_party = ["ant"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
