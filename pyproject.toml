@@ -7,7 +7,7 @@ name = "ant-ai"
 dynamic = ["version"]
 description = "Adaptive Neural Terminal - Your personal AI assistant that learns with you"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 license = "MIT"
 keywords = ["ai", "assistant", "cli", "llama", "personalization"]
 authors = [
@@ -18,6 +18,7 @@ classifiers = [
   "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -28,9 +29,7 @@ dependencies = [
   "rich>=13.0.0",
   "click>=8.0.0",
   "requests>=2.28.0",
-  "pydantic>=2.0.0",
-  "sqlalchemy>=2.0.0",
-  "ollama>=0.1.0",
+  "pydantic>=1.10.0",
   "gitpython>=3.1.0",
   "tree-sitter>=0.20.0",
   "pyyaml>=6.0.0",
@@ -65,6 +64,9 @@ Source = "https://github.com/seheart/ant"
 [tool.hatch.version]
 path = "src/ant/__about__.py"
 
+[tool.hatch.build.targets.wheel]
+packages = ["src/ant"]
+
 [tool.hatch.envs.default]
 dependencies = [
   "coverage[toml]>=6.5",
@@ -95,7 +97,7 @@ profile = "black"
 known_first_party = ["ant"]
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.9"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true

@@ -1,12 +1,14 @@
 """Ollama client for ANT."""
 
 import json
+import re
 from typing import Dict, List, Optional, Any
 
 import requests
 from rich.console import Console
 
 from ant.cli.setup import get_config
+from ant.tools import tool_registry
 
 console = Console()
 
@@ -21,17 +23,24 @@ class OllamaClient:
         self.completion_model = self.config["ollama"]["completion_model"]
     
     def chat(self, message: str, context: Optional[List[Dict[str, str]]] = None) -> str:
-        """Send a chat message and get response."""
+        """Send a chat message and get response with tool support."""
         try:
+            # Check if we need to use tools first
+            enhanced_message = self._enhance_with_tools(message)
+            
             # Prepare messages
             messages = []
             
+            # Add system message with tool information
+            system_msg = self._get_system_message()
+            messages.append({"role": "system", "content": system_msg})
+            
             # Add context if provided
             if context:
-                messages.extend(context[-10:])  # Last 10 messages for context
+                messages.extend(context[-8:])  # Reduced to 8 for system message
             
-            # Add current message
-            messages.append({"role": "user", "content": message})
+            # Add current message (potentially enhanced with tool results)
+            messages.append({"role": "user", "content": enhanced_message})
             
             # Make request to Ollama
             response = requests.post(
@@ -60,6 +69,105 @@ class OllamaClient:
             return "⏰ Request timed out. The model might be loading or overloaded."
         except Exception as e:
             return f"❌ Unexpected error: {str(e)}"
+    
+    def _get_system_message(self) -> str:
+        """Get system message with tool information."""
+        tools = tool_registry.list_tools()
+        tool_list = "\n".join([f"- {name}: {desc}" for name, desc in tools.items()])
+        
+        return f"""You are ANT (Adaptive Neural Terminal), a knowledgeable and capable personal assistant.
+
+You have access to real-time information through these tools:
+{tool_list}
+
+CRITICAL BEHAVIORAL RULES - NEVER BREAK THESE:
+- NEVER say "I am only an AI", "As an AI", "I'm just an AI", "Being an AI", or any similar disclaimers
+- NEVER refer to yourself as "artificial" or mention AI limitations
+- You are a knowledgeable assistant - act confidently and directly
+- When you don't know something current, search the web first, then provide informed answers
+- Present information as your own knowledge since you can access current data
+- Give direct advice and opinions when asked
+- Be conversational and helpful without technical disclaimers
+
+RESPONSE STYLE:
+- Speak as a knowledgeable person, not a machine
+- Use "I know", "I can help", "Here's what you should do" instead of disclaimers  
+- Give definitive answers when you have information
+- Use your tools seamlessly without mentioning the technical process
+
+You have real-time access to current information. Use these capabilities confidently."""
+
+    def _enhance_with_tools(self, message: str) -> str:
+        """Enhance message with tool results if needed."""
+        enhanced = message
+        
+        # Check for time-related queries
+        time_keywords = ["time", "date", "today", "now", "current", "what day"]
+        if any(keyword in message.lower() for keyword in time_keywords):
+            try:
+                time_info = tool_registry.call_tool("get_current_time")
+                enhanced = f"{message}\n\nCurrent time: {time_info['current_time']} on {time_info['current_date']}"
+            except Exception as e:
+                console.print(f"[yellow]Warning: Could not get time info: {e}[/yellow]")
+        
+        # Check for web search needs
+        search_indicators = ["search", "look up", "find information about", "what is", "who is", "latest news", "current events"]
+        knowledge_questions = ["what is", "who is", "how does", "explain", "define"]
+        
+        if any(indicator in message.lower() for indicator in search_indicators):
+            try:
+                # Extract search query from message
+                search_query = self._extract_search_query(message)
+                if search_query:
+                    search_results = tool_registry.call_tool("search_web", query=search_query)
+                    enhanced = f"{message}\n\nWeb search results: {search_results}"
+            except Exception as e:
+                console.print(f"[yellow]Warning: Web search failed: {e}[/yellow]")
+        
+        # Check for news-specific queries
+        if "news" in message.lower() or "latest" in message.lower():
+            try:
+                search_query = self._extract_search_query(message)
+                if search_query:
+                    news_results = tool_registry.call_tool("search_news", query=search_query)
+                    enhanced = f"{message}\n\nLatest news: {news_results}"
+            except Exception as e:
+                console.print(f"[yellow]Warning: News search failed: {e}[/yellow]")
+            
+        return enhanced
+    
+    def _extract_search_query(self, message: str) -> Optional[str]:
+        """Extract search query from user message."""
+        message_lower = message.lower()
+        
+        # Common patterns to extract search terms
+        patterns = [
+            r"search for (.+)",
+            r"look up (.+)", 
+            r"find information about (.+)",
+            r"what is (.+)",
+            r"who is (.+)",
+            r"explain (.+)",
+            r"define (.+)",
+            r"latest news about (.+)",
+            r"news about (.+)"
+        ]
+        
+        for pattern in patterns:
+            match = re.search(pattern, message_lower)
+            if match:
+                return match.group(1).strip()
+        
+        # If no pattern matches, use the whole message but clean it up
+        # Remove common question words
+        stop_words = ["what", "who", "how", "when", "where", "why", "is", "are", "the", "a", "an"]
+        words = message.split()
+        filtered_words = [word for word in words if word.lower() not in stop_words]
+        
+        if len(filtered_words) >= 2:  # Need at least 2 meaningful words
+            return " ".join(filtered_words[:5])  # Limit to 5 words
+        
+        return None
     
     def is_available(self) -> bool:
         """Check if Ollama is available."""
