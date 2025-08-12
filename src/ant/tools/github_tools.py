@@ -196,3 +196,6 @@ GITHUB_TOOLS = {
         }
     }
 }
+
+# Aliases for backward compatibility
+get_repository_info = get_github_repo_info

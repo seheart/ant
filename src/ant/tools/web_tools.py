@@ -63,7 +63,7 @@ def search_duckduckgo(query: str, max_results: int = 5) -> Dict[str, Any]:
         return {"error": f"Search failed: {str(e)}"}
 
 
-def get_web_summary(query: str) -> str:
+def search_web(query: str) -> str:
     """Get a concise summary from web search.
     
     Args:
@@ -120,7 +120,7 @@ def search_news(query: str) -> Dict[str, Any]:
 # Tool registry for web search functions
 WEB_TOOLS = {
     "search_web": {
-        "function": get_web_summary,
+        "function": search_web,
         "description": "Search the web for information about a topic",
         "parameters": {
             "query": {"type": "string", "description": "Search query"}
