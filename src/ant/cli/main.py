@@ -8,25 +8,30 @@ import click
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
+from rich.box import ROUNDED
 
 from ant.__about__ import __version__
 from ant.cli.chat import start_chat_session
 from ant.cli.setup import run_setup
+from ant.user.auth import auth_manager
+from ant.user.profile import user_profile
 
-console = Console()
+console = Console(width=None, legacy_windows=False)
 
 
 def show_banner() -> None:
     """Display ANT banner."""
-    banner = Text("🐜 ANT - Adaptive Neural Terminal", style="bold magenta")
-    subtitle = Text("Your personal AI assistant that learns with you", style="dim")
-    
-    panel = Panel.fit(
-        Text.assemble(banner, "\n", subtitle),
-        border_style="magenta",
-        padding=(1, 2)
+    # Create a boxed banner with the ant emoji and title
+    banner_content = "🐜 ANT - Your personal AI assistant that learns with you"
+    banner_panel = Panel(
+        banner_content,
+        box=ROUNDED,
+        padding=(0, 1)
     )
-    console.print(panel)
+    
+    console.print()
+    console.print(banner_panel)
+    console.print()
 
 
 @click.group(invoke_without_command=True)
@@ -74,9 +79,75 @@ def ask(message: tuple[str, ...]) -> None:
 @main.command()
 def status() -> None:
     """Show ANT system status."""
-    # TODO: Implement status check
     console.print("📊 ANT Status", style="bold blue")
-    console.print("🚧 Status check coming soon!", style="yellow")
+    
+    # User info
+    user_name = user_profile.get_user_name()
+    user_info = user_profile.get_user_info()
+    console.print(f"User: {user_name} ({user_info.get('username', 'unknown')})")
+    console.print(f"System: {user_info.get('hostname', 'unknown')}")
+    
+    # Auth status
+    services = auth_manager.list_authenticated_services()
+    if services:
+        console.print(f"Authenticated services: {', '.join(services)}")
+    else:
+        console.print("No external services authenticated")
+
+
+@main.command()
+@click.argument("service", required=False)
+@click.argument("action", required=False)
+def auth(service: Optional[str], action: Optional[str]) -> None:
+    """Manage authentication for external services."""
+    if not service:
+        console.print("🔐 ANT Authentication Manager", style="bold blue")
+        console.print()
+        
+        # Show current status
+        services = auth_manager.list_authenticated_services()
+        if services:
+            console.print("✅ Authenticated services:")
+            for svc in services:
+                console.print(f"  • {svc}")
+            console.print()
+        
+        console.print("Usage:")
+        console.print("  ant auth github   - Set up GitHub authentication")
+        console.print("  ant auth google   - Set up Google authentication") 
+        console.print("  ant auth status   - Show detailed auth status")
+        console.print("  ant auth revoke <service> - Revoke service authentication")
+        return
+    
+    if service == "status":
+        # Show detailed status
+        console.print("🔐 Authentication Status", style="bold blue")
+        services = auth_manager.list_authenticated_services()
+        
+        if not services:
+            console.print("No services authenticated")
+            return
+        
+        for svc in services:
+            token = auth_manager.get_token(svc)
+            console.print(f"\n{svc}:")
+            console.print(f"  Status: ✅ Authenticated")
+            console.print(f"  Type: {token.get('type', 'unknown')}")
+            if 'last_updated' in auth_manager.config.get('auth', {}).get('last_updated', {}):
+                console.print(f"  Updated: {auth_manager.config['auth']['last_updated'][svc]}")
+        
+    elif service == "revoke" and action:
+        auth_manager.revoke_service_auth(action)
+        
+    elif service == "github":
+        auth_manager.setup_github_auth()
+        
+    elif service == "google":
+        auth_manager.setup_google_auth()
+        
+    else:
+        console.print(f"❌ Unknown service or command: {service}", style="red")
+        console.print("Run 'ant auth' for help")
 
 
 if __name__ == "__main__":

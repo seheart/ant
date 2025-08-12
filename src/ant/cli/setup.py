@@ -8,7 +8,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Confirm, Prompt
 
-console = Console()
+console = Console(width=None, legacy_windows=False)
 
 CONFIG_DIR = Path.home() / ".ant"
 CONFIG_FILE = CONFIG_DIR / "config.yaml"

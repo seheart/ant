@@ -3,6 +3,7 @@
 from typing import Dict, Any, Callable
 from .datetime_tools import DATETIME_TOOLS
 from .web_tools import WEB_TOOLS
+from .github_tools import GITHUB_TOOLS
 
 
 class ToolRegistry:
@@ -16,6 +17,7 @@ class ToolRegistry:
         """Register default tools."""
         self.tools.update(DATETIME_TOOLS)
         self.tools.update(WEB_TOOLS)
+        self.tools.update(GITHUB_TOOLS)
     
     def register_tool(self, name: str, function: Callable, description: str, parameters: Dict[str, Any] = None):
         """Register a new tool.

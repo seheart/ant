@@ -8,7 +8,7 @@ from typing import Dict, List, Optional, Any
 
 from rich.console import Console
 
-console = Console()
+console = Console(width=None, legacy_windows=False)
 
 # Database location
 DB_DIR = Path.home() / ".ant"
