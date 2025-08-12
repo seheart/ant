@@ -116,104 +116,28 @@ RESPONSE STYLE:
 - Use your tools seamlessly without mentioning the technical process
 - Adapt to {user_name}'s communication style: {comm_style}
 
-TOOL USAGE RULES:
-- ALWAYS use your tools when they can provide the requested information
-- When asked for system analysis, IMMEDIATELY use analyze_linux_system tool
-- When asked about files, automatically read/write/manage them with file tools
-- When asked to run commands, use execute_command tool directly
-- When asked for current info, search the web automatically
-- NEVER suggest manual commands when you have tools to do the work
+TOOL AWARENESS:
+- You have powerful tools available - use them naturally when they would be helpful
+- Trust your understanding of when a tool would benefit the user
+- Use tools seamlessly as part of your natural problem-solving process
+- Consider the user's actual intent rather than specific keywords
 
 You have real-time access to current information and system operations. Use these capabilities confidently and automatically to help {user_name}."""
 
     def _enhance_with_tools(self, message: str) -> str:
         """Enhance message with tool results if needed."""
-        enhanced = message
+        # NO HARD-CODED KEYWORD DETECTION!
+        # The LLM should naturally understand when to use tools based on:
+        # 1. Tool descriptions in system prompt
+        # 2. Natural language understanding
+        # 3. Context and conversation flow
         
-        # Check for system analysis requests
-        analysis_keywords = [
-            "analysis of my linux machine", "analyze my system", "system analysis",
-            "machine analysis", "linux analysis", "hardware analysis", "system report"
-        ]
-        
-        if any(keyword in message.lower() for keyword in analysis_keywords):
-            try:
-                from ant.tools.system_analysis import analyze_linux_system
-                result = analyze_linux_system()
-                if result.get('success'):
-                    enhanced += f"\n\nSYSTEM ANALYSIS COMPLETED:\n{result['formatted_report']}"
-                else:
-                    enhanced += f"\n\nSystem analysis failed: {result.get('error', 'Unknown error')}"
-            except Exception as e:
-                enhanced += f"\n\nError running system analysis: {str(e)}"
-        
-        # Check for time-related queries
-        time_keywords = ["time", "date", "today", "now", "current", "what day"]
-        if any(keyword in message.lower() for keyword in time_keywords):
-            try:
-                time_info = tool_registry.call_tool("get_current_time")
-                enhanced = f"{message}\n\nCurrent time: {time_info['current_time']} on {time_info['current_date']}"
-            except Exception as e:
-                console.print(f"[yellow]Warning: Could not get time info: {e}[/yellow]")
-        
-        # Check for web search needs
-        search_indicators = ["search", "look up", "find information about", "what is", "who is", "latest news", "current events"]
-        knowledge_questions = ["what is", "who is", "how does", "explain", "define"]
-        
-        if any(indicator in message.lower() for indicator in search_indicators):
-            try:
-                # Extract search query from message
-                search_query = self._extract_search_query(message)
-                if search_query:
-                    search_results = tool_registry.call_tool("search_web", query=search_query)
-                    enhanced = f"{message}\n\nWeb search results: {search_results}"
-            except Exception as e:
-                console.print(f"[yellow]Warning: Web search failed: {e}[/yellow]")
-        
-        # Check for news-specific queries
-        if "news" in message.lower() or "latest" in message.lower():
-            try:
-                search_query = self._extract_search_query(message)
-                if search_query:
-                    news_results = tool_registry.call_tool("search_news", query=search_query)
-                    enhanced = f"{message}\n\nLatest news: {news_results}"
-            except Exception as e:
-                console.print(f"[yellow]Warning: News search failed: {e}[/yellow]")
-            
-        return enhanced
+        # This method is reserved for future dynamic tool enhancement
+        # where the LLM itself decides what tools to use
+        return message
     
-    def _extract_search_query(self, message: str) -> Optional[str]:
-        """Extract search query from user message."""
-        message_lower = message.lower()
-        
-        # Common patterns to extract search terms
-        patterns = [
-            r"search for (.+)",
-            r"look up (.+)", 
-            r"find information about (.+)",
-            r"what is (.+)",
-            r"who is (.+)",
-            r"explain (.+)",
-            r"define (.+)",
-            r"latest news about (.+)",
-            r"news about (.+)"
-        ]
-        
-        for pattern in patterns:
-            match = re.search(pattern, message_lower)
-            if match:
-                return match.group(1).strip()
-        
-        # If no pattern matches, use the whole message but clean it up
-        # Remove common question words
-        stop_words = ["what", "who", "how", "when", "where", "why", "is", "are", "the", "a", "an"]
-        words = message.split()
-        filtered_words = [word for word in words if word.lower() not in stop_words]
-        
-        if len(filtered_words) >= 2:  # Need at least 2 meaningful words
-            return " ".join(filtered_words[:5])  # Limit to 5 words
-        
-        return None
+    # Removed hard-coded search query extraction method
+    # LLM should naturally understand and formulate queries
     
     def is_available(self) -> bool:
         """Check if Ollama is available."""
