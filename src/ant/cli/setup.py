@@ -31,6 +31,12 @@ DEFAULT_CONFIG = {
         "file_operations": True,
         "git_integration": True,
         "code_analysis": True,
+        "system_operations": True,
+    },
+    "system": {
+        "safe_mode": True,
+        "allowed_paths": [],  # Additional paths beyond default safe paths
+        "max_command_timeout": 60,  # Maximum timeout for system commands
     }
 }
 
