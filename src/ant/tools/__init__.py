@@ -9,6 +9,7 @@ from .system_tools import (
     delete_file_or_directory, execute_command, copy_file_or_directory, 
     move_file_or_directory
 )
+from .system_analysis import analyze_linux_system
 
 # Auto-register all tools
 tool_registry.register_tool("get_current_time", get_current_time, "Get current date and time")
@@ -30,6 +31,7 @@ tool_registry.register_tool("delete_file_or_directory", delete_file_or_directory
 tool_registry.register_tool("execute_command", execute_command, "Execute a system command safely")
 tool_registry.register_tool("copy_file_or_directory", copy_file_or_directory, "Copy a file or directory")
 tool_registry.register_tool("move_file_or_directory", move_file_or_directory, "Move or rename a file or directory")
+tool_registry.register_tool("analyze_linux_system", analyze_linux_system, "Perform comprehensive Linux system analysis and generate detailed report")
 
 __all__ = [
     "tool_registry",
@@ -49,5 +51,6 @@ __all__ = [
     "delete_file_or_directory",
     "execute_command",
     "copy_file_or_directory",
-    "move_file_or_directory"
+    "move_file_or_directory",
+    "analyze_linux_system"
 ]
