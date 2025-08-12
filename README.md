@@ -24,13 +24,17 @@ ant
 
 ## 📋 Current Status
 
-🏗️ **In Development** - See [PLAN.md](PLAN.md) for detailed roadmap
+🏗️ **In Development** - See [📊 **Development Roadmap**](DEVELOPMENT_ROADMAP.md) for detailed phases and milestones
 
-- [ ] Phase 1: Foundation (CLI + Memory)
-- [ ] Phase 2: Intelligence (Code awareness)  
-- [ ] Phase 3: Learning Pipeline
-- [ ] Phase 4: Personal Model
-- [ ] Phase 5: Advanced Features
+### Current Phase: Phase 1 - Foundation Building
+- [ ] **Milestone 1.1:** [Complete 3 Simple Websites](https://github.com/seheart/ant/issues/2)
+- [ ] **Milestone 1.2:** [Llama 4 Local Deployment](https://github.com/seheart/ant/issues/3)  
+- [ ] **Milestone 1.3:** [Preference Documentation System](https://github.com/seheart/ant/issues/4)
+
+### Upcoming Phases
+- [ ] **Phase 2:** Enhanced Memory & GitHub Integration
+- [ ] **Phase 3:** Hosting & Deployment Workflows
+- [ ] **Phase 4:** Model Fine-tuning & True Learning
 
 ## 🎯 Vision
 
@@ -42,7 +46,9 @@ After months of learning with you, ANT will:
 
 ## 📚 Documentation
 
-- [Development Plan](PLAN.md) - Detailed roadmap and architecture
+- [📊 **Development Roadmap**](DEVELOPMENT_ROADMAP.md) - Complete 4-phase development plan
+- [🧠 **Learning Strategy**](docs/LEARNING_STRATEGY.md) - Detailed learning architecture and approach
+- [📋 **Project Issues**](https://github.com/seheart/ant/issues) - Track current development milestones
 - [Contributing](docs/CONTRIBUTING.md) - How to contribute (coming soon)
 - [API Reference](docs/API.md) - Technical documentation (coming soon)
 
