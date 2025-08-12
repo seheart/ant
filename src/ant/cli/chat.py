@@ -70,6 +70,14 @@ class ChatSession:
                     console.clear()
                     console.print("[dim]Conversation cleared[/dim]")
                     continue
+                elif user_input.lower() in ['/cls', '/clear-terminal']:
+                    import os
+                    os.system('clear' if os.name == 'posix' else 'cls')
+                    # Show banner again after clearing
+                    from ant.cli.main import show_banner
+                    show_banner()
+                    console.print("💬 Starting chat session...")
+                    continue
                 elif user_input.lower() == '/status':
                     self._show_status()
                     continue
@@ -120,6 +128,7 @@ class ChatSession:
 • Just type naturally - I'm here to help!
 • `?` or `/help` - Show this help message
 • `/clear` - Clear conversation history  
+• `/cls` or `/clear-terminal` - Clear screen and restart fresh
 • `/status` - Show system status
 • `/quit` or `/exit` - End conversation
 • `/wiki` - Open full documentation in web browser
