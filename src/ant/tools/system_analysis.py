@@ -7,6 +7,10 @@ import subprocess
 from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional
 import socket
+from rich.console import Console
+from rich.syntax import Syntax
+
+console = Console()
 
 
 def analyze_linux_system() -> Dict[str, Any]:
@@ -16,12 +20,36 @@ def analyze_linux_system() -> Dict[str, Any]:
         Dict containing detailed system analysis and formatted report
     """
     
-    def run_command(cmd: str) -> str:
-        """Run a command and return output safely."""
+    def run_command(cmd: str, description: str = "") -> str:
+        """Run a command and return output safely with real-time display."""
         try:
+            # Show what we're running
+            console.print(f"\n[dim]Running:[/dim] [bold cyan]{cmd}[/bold cyan]")
+            if description:
+                console.print(f"[dim]{description}[/dim]")
+            
             result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=10)
-            return result.stdout.strip()
-        except:
+            output = result.stdout.strip()
+            
+            # Show a sample of the output
+            if output:
+                # Show first few lines of output
+                lines = output.split('\n')
+                preview_lines = lines[:3] if len(lines) > 3 else lines
+                console.print("[dim]Output:[/dim]")
+                for line in preview_lines:
+                    console.print(f"[dim]  {line}[/dim]")
+                if len(lines) > 3:
+                    console.print(f"[dim]  ... ({len(lines) - 3} more lines)[/dim]")
+            else:
+                console.print("[dim]  (no output)[/dim]")
+                
+            return output
+        except subprocess.TimeoutExpired:
+            console.print("[red]  Command timed out[/red]")
+            return ""
+        except Exception as e:
+            console.print(f"[red]  Error: {str(e)}[/red]")
             return ""
     
     def parse_size(size_str: str) -> float:
@@ -49,23 +77,27 @@ def analyze_linux_system() -> Dict[str, Any]:
     
     analysis = {}
     
+    console.print("\n[bold green]🔍 Starting Linux System Analysis...[/bold green]\n")
+    
     # System Overview
+    console.print("[bold blue]📋 Gathering System Overview[/bold blue]")
     analysis['system'] = {
         'hostname': socket.gethostname(),
-        'os_info': run_command("lsb_release -d 2>/dev/null | cut -d: -f2 | xargs") or 
-                  run_command("cat /etc/os-release | grep PRETTY_NAME | cut -d'=' -f2 | tr -d '\"'"),
-        'kernel': run_command("uname -r"),
-        'architecture': run_command("uname -m"),
-        'uptime': run_command("uptime -p"),
-        'uptime_since': run_command("uptime -s")
+        'os_info': run_command("lsb_release -d 2>/dev/null | cut -d: -f2 | xargs", "Getting OS information") or 
+                  run_command("cat /etc/os-release | grep PRETTY_NAME | cut -d'=' -f2 | tr -d '\"'", "Fallback OS detection"),
+        'kernel': run_command("uname -r", "Getting kernel version"),
+        'architecture': run_command("uname -m", "Getting system architecture"),
+        'uptime': run_command("uptime -p", "Getting system uptime"),
+        'uptime_since': run_command("uptime -s", "Getting boot time")
     }
     
     # CPU Information
-    cpu_info = run_command("lscpu")
-    cpu_model = run_command("grep 'model name' /proc/cpuinfo | head -1 | cut -d: -f2 | xargs")
-    cpu_cores = run_command("nproc --all")
-    cpu_threads = run_command("grep -c ^processor /proc/cpuinfo")
-    load_avg = run_command("uptime | grep -o 'load average:.*' | cut -d: -f2 | xargs")
+    console.print("\n[bold blue]🖥️  Analyzing CPU Performance[/bold blue]")
+    cpu_info = run_command("lscpu", "Getting detailed CPU information")
+    cpu_model = run_command("grep 'model name' /proc/cpuinfo | head -1 | cut -d: -f2 | xargs", "Getting CPU model")
+    cpu_cores = run_command("nproc --all", "Counting CPU cores")
+    cpu_threads = run_command("grep -c ^processor /proc/cpuinfo", "Counting CPU threads")
+    load_avg = run_command("uptime | grep -o 'load average:.*' | cut -d: -f2 | xargs", "Getting load average")
     
     analysis['cpu'] = {
         'model': cpu_model,
@@ -76,11 +108,12 @@ def analyze_linux_system() -> Dict[str, Any]:
     }
     
     # Memory Information
-    mem_info = run_command("free -h")
-    mem_total = run_command("free -h | grep Mem | awk '{print $2}'")
-    mem_used = run_command("free -h | grep Mem | awk '{print $3}'")
-    mem_available = run_command("free -h | grep Mem | awk '{print $7}'")
-    swap_info = run_command("free -h | grep Swap | awk '{print $2}'")
+    console.print("\n[bold blue]🧠 Analyzing Memory Usage[/bold blue]")
+    mem_info = run_command("free -h", "Getting memory information")
+    mem_total = run_command("free -h | grep Mem | awk '{print $2}'", "Getting total memory")
+    mem_used = run_command("free -h | grep Mem | awk '{print $3}'", "Getting used memory")
+    mem_available = run_command("free -h | grep Mem | awk '{print $7}'", "Getting available memory")
+    swap_info = run_command("free -h | grep Swap | awk '{print $2}'", "Getting swap information")
     
     analysis['memory'] = {
         'total': mem_total,
@@ -91,26 +124,28 @@ def analyze_linux_system() -> Dict[str, Any]:
     }
     
     # GPU Information
+    console.print("\n[bold blue]🎮 Detecting GPU Hardware[/bold blue]")
     gpu_info = ""
-    nvidia_info = run_command("nvidia-smi --query-gpu=name,driver_version,memory.total,memory.used,utilization.gpu,power.draw,power.limit --format=csv,noheader,nounits 2>/dev/null")
+    nvidia_info = run_command("nvidia-smi --query-gpu=name,driver_version,memory.total,memory.used,utilization.gpu,power.draw,power.limit --format=csv,noheader,nounits 2>/dev/null", "Checking for NVIDIA GPU")
     
     if nvidia_info:
         analysis['gpu'] = {
             'type': 'NVIDIA',
             'nvidia_smi': nvidia_info,
-            'cuda_version': run_command("nvcc --version 2>/dev/null | grep 'release' | grep -o 'V[0-9]*\\.[0-9]*' | cut -d'V' -f2")
+            'cuda_version': run_command("nvcc --version 2>/dev/null | grep 'release' | grep -o 'V[0-9]*\\.[0-9]*' | cut -d'V' -f2", "Checking CUDA version")
         }
     else:
         # Try for AMD or Intel
-        gpu_info = run_command("lspci | grep -i vga")
+        gpu_info = run_command("lspci | grep -i vga", "Checking for other GPU types")
         analysis['gpu'] = {
             'type': 'Other',
             'info': gpu_info
         }
     
     # Storage Information
-    disk_info = run_command("df -h")
-    block_devices = run_command("lsblk -o NAME,SIZE,TYPE,MOUNTPOINT,FSTYPE")
+    console.print("\n[bold blue]💾 Analyzing Storage Devices[/bold blue]")
+    disk_info = run_command("df -h", "Getting disk usage information")
+    block_devices = run_command("lsblk -o NAME,SIZE,TYPE,MOUNTPOINT,FSTYPE", "Getting block device information")
     
     analysis['storage'] = {
         'disk_usage': disk_info,
@@ -118,39 +153,45 @@ def analyze_linux_system() -> Dict[str, Any]:
     }
     
     # Software Environment
+    console.print("\n[bold blue]💻 Scanning Software Environment[/bold blue]")
     analysis['software'] = {
         'shell': os.environ.get('SHELL', ''),
-        'python': run_command("python --version 2>&1"),
-        'node': run_command("node --version 2>/dev/null"),
-        'git': run_command("git --version 2>/dev/null"),
-        'docker': run_command("docker --version 2>/dev/null"),
+        'python': run_command("python --version 2>&1", "Checking Python version"),
+        'node': run_command("node --version 2>/dev/null", "Checking Node.js version"),
+        'git': run_command("git --version 2>/dev/null", "Checking Git version"),
+        'docker': run_command("docker --version 2>/dev/null", "Checking Docker version"),
         'code_editors': []
     }
     
     # Check for code editors
+    console.print("\n[bold blue]📝 Detecting Code Editors[/bold blue]")
     editors = ['code', 'zed', 'cursor', 'vim', 'nano', 'emacs']
     for editor in editors:
-        if run_command(f"which {editor} 2>/dev/null"):
+        if run_command(f"which {editor} 2>/dev/null", f"Checking for {editor}"):
             analysis['software']['code_editors'].append(editor)
     
     # AI/ML Tools
+    console.print("\n[bold blue]🤖 Checking AI/ML Infrastructure[/bold blue]")
     analysis['ai_ml'] = {
-        'ollama': run_command("pgrep -f ollama > /dev/null && echo 'Running' || echo 'Not running'"),
-        'conda': run_command("conda --version 2>/dev/null"),
-        'pip': run_command("pip --version 2>/dev/null")
+        'ollama': run_command("pgrep -f ollama > /dev/null && echo 'Running' || echo 'Not running'", "Checking Ollama service"),
+        'conda': run_command("conda --version 2>/dev/null", "Checking Conda"),
+        'pip': run_command("pip --version 2>/dev/null", "Checking pip")
     }
     
     # Running Services
-    services = run_command("systemctl list-units --type=service --state=running --no-pager --no-legend | awk '{print $1}' | head -20")
+    console.print("\n[bold blue]⚙️  Checking Running Services[/bold blue]")
+    services = run_command("systemctl list-units --type=service --state=running --no-pager --no-legend | awk '{print $1}' | head -20", "Getting active services")
     analysis['services'] = services.split('\n') if services else []
     
     # Network Information
+    console.print("\n[bold blue]🌐 Analyzing Network Configuration[/bold blue]")
     analysis['network'] = {
-        'interfaces': run_command("ip addr show | grep '^[0-9]' | awk '{print $2}' | tr -d ':'"),
-        'connections': run_command("ss -tuln | grep LISTEN | wc -l")
+        'interfaces': run_command("ip addr show | grep '^[0-9]' | awk '{print $2}' | tr -d ':'", "Getting network interfaces"),
+        'connections': run_command("ss -tuln | grep LISTEN | wc -l", "Counting listening ports")
     }
     
-    # Now generate the formatted report
+    # Generate the formatted report
+    console.print("\n[bold green]✅ Analysis Complete! Generating Report...[/bold green]\n")
     report = _generate_analysis_report(analysis)
     
     return {
