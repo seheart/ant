@@ -148,7 +148,7 @@ class ChatSession:
     
     def _open_wiki(self) -> None:
         """Open ANT documentation wiki in web browser."""
-        wiki_url = "https://github.com/your-username/ant/wiki"  # Update with actual wiki URL
+        wiki_url = "https://github.com/seheart/ant/wiki"
         console.print()
         console.print(f"[dim]Opening ANT documentation at {wiki_url}...[/dim]")
         try:
