@@ -10,7 +10,6 @@ from rich.console import Console
 from ant.cli.setup import get_config
 from ant.tools import tool_registry
 from ant.user.profile import user_profile
-from ant.learning.personal_memory import personal_memory
 
 console = Console(width=None, legacy_windows=False)
 
@@ -82,8 +81,6 @@ class OllamaClient:
         user_name = user_profile.get_user_name()
         comm_style = user_profile.get_preference("communication_style", "friendly")
         
-        # Get personal memory context
-        personal_context = personal_memory.get_conversation_context()
         
         return f"""You are ANT (Adaptive Neural Terminal), {user_name}'s knowledgeable and capable personal assistant.
 
@@ -92,9 +89,6 @@ USER CONTEXT:
 - Username: {user_info.get('username', 'user')}
 - Communication style preference: {comm_style}
 - System: {user_info.get('hostname', 'local')} ({user_info.get('shell', '/bin/bash')})
-
-PERSONAL CONTEXT:
-{personal_context}
 
 You have access to real-time information and system operations through these tools:
 {tool_list}

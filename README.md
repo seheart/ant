@@ -1,16 +1,16 @@
 # 🐜 ANT - Adaptive Neural Terminal
 
-> Your personal AI assistant that learns and grows with you
+> Your intelligent CLI assistant for development workflows
 
-ANT is a local CLI AI assistant that starts with a base Llama model and continuously evolves to become perfectly tailored to your workflow, preferences, and personality.
+ANT is a local CLI AI assistant focused on development tasks - system operations, file management, project workflows, and developer productivity. Clean, efficient, and built for getting work done.
 
 ## ✨ What makes ANT special?
 
-- **🧠 Learns from you**: Gets better the more you use it
-- **🏠 Completely local**: Your data never leaves your machine  
-- **🎭 Personal**: Adapts to your communication style and preferences
-- **⚡ Fast**: Optimized for your hardware
-- **🛠️ Integrated**: Works with your files, git, and development workflow
+- **🛠️ Developer-Focused**: Built specifically for development workflows and system operations
+- **🏠 Completely Local**: Your data never leaves your machine  
+- **⚡ Fast & Efficient**: Optimized for quick development tasks
+- **🔧 System Operations**: Full file management, command execution, and system analysis
+- **📊 Intelligent**: Uses natural language understanding for tool selection
 
 ## 🚀 Quick Start
 
@@ -36,13 +36,13 @@ ant
 - [ ] **Phase 3:** Hosting & Deployment Workflows
 - [ ] **Phase 4:** Model Fine-tuning & True Learning
 
-## 🎯 Vision
+## 🎯 Purpose
 
-After months of learning with you, ANT will:
-- Know your coding style and suggest code in your exact style
-- Understand your projects and provide contextual help
-- Anticipate your needs: "Should I update the tests for this new function?"
-- Adapt to your workflow and communication preferences
+ANT is your intelligent CLI companion for:
+- **System Operations**: File management, directory operations, command execution
+- **Development Workflows**: Project setup, GitHub integration, deployment assistance  
+- **System Analysis**: Comprehensive hardware and software environment analysis
+- **Developer Productivity**: Streamlined workflows without leaving the terminal
 
 ## 📚 Documentation
 
@@ -54,7 +54,11 @@ After months of learning with you, ANT will:
 
 ## 🤝 Philosophy
 
-The best AI assistant is one that learns to be exactly what YOU need. ANT grows with you, becoming more helpful over time while keeping everything local and private.
+ANT believes in clean, focused tools that do one thing exceptionally well. No bloat, no unnecessary features - just intelligent assistance for development workflows with complete local privacy.
+
+## 🔗 Related Projects
+
+- **[Metatron](https://github.com/seheart/metatron)** - Personal AI assistant that learns about you through conversation and fine-tuning
 
 ---
 

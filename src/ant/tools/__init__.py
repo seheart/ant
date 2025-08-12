@@ -10,10 +10,6 @@ from .system_tools import (
     move_file_or_directory
 )
 from .system_analysis import analyze_linux_system
-from .personal_learning import (
-    record_personality_insight, record_conversation_insight, 
-    record_personal_preference, get_personal_summary
-)
 
 # Auto-register all tools
 tool_registry.register_tool("get_current_time", get_current_time, "Get current date and time")
@@ -37,11 +33,6 @@ tool_registry.register_tool("copy_file_or_directory", copy_file_or_directory, "C
 tool_registry.register_tool("move_file_or_directory", move_file_or_directory, "Move or rename a file or directory")
 tool_registry.register_tool("analyze_linux_system", analyze_linux_system, "Perform comprehensive Linux system analysis and generate detailed report")
 
-# Personal learning tools
-tool_registry.register_tool("record_personality_insight", record_personality_insight, "Record a personality insight about Seth (communication style, values, etc.)")
-tool_registry.register_tool("record_conversation_insight", record_conversation_insight, "Record an insight from our conversation")
-tool_registry.register_tool("record_personal_preference", record_personal_preference, "Record a personal preference about Seth") 
-tool_registry.register_tool("get_personal_summary", get_personal_summary, "Get a summary of what I know about Seth personally")
 
 __all__ = [
     "tool_registry",
@@ -62,9 +53,5 @@ __all__ = [
     "execute_command",
     "copy_file_or_directory",
     "move_file_or_directory",
-    "analyze_linux_system",
-    "record_personality_insight",
-    "record_conversation_insight", 
-    "record_personal_preference",
-    "get_personal_summary"
+    "analyze_linux_system"
 ]
