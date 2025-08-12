@@ -116,11 +116,36 @@ RESPONSE STYLE:
 - Use your tools seamlessly without mentioning the technical process
 - Adapt to {user_name}'s communication style: {comm_style}
 
-You have real-time access to current information. Use these capabilities confidently to help {user_name}."""
+TOOL USAGE RULES:
+- ALWAYS use your tools when they can provide the requested information
+- When asked for system analysis, IMMEDIATELY use analyze_linux_system tool
+- When asked about files, automatically read/write/manage them with file tools
+- When asked to run commands, use execute_command tool directly
+- When asked for current info, search the web automatically
+- NEVER suggest manual commands when you have tools to do the work
+
+You have real-time access to current information and system operations. Use these capabilities confidently and automatically to help {user_name}."""
 
     def _enhance_with_tools(self, message: str) -> str:
         """Enhance message with tool results if needed."""
         enhanced = message
+        
+        # Check for system analysis requests
+        analysis_keywords = [
+            "analysis of my linux machine", "analyze my system", "system analysis",
+            "machine analysis", "linux analysis", "hardware analysis", "system report"
+        ]
+        
+        if any(keyword in message.lower() for keyword in analysis_keywords):
+            try:
+                from ant.tools.system_analysis import analyze_linux_system
+                result = analyze_linux_system()
+                if result.get('success'):
+                    enhanced += f"\n\nSYSTEM ANALYSIS COMPLETED:\n{result['formatted_report']}"
+                else:
+                    enhanced += f"\n\nSystem analysis failed: {result.get('error', 'Unknown error')}"
+            except Exception as e:
+                enhanced += f"\n\nError running system analysis: {str(e)}"
         
         # Check for time-related queries
         time_keywords = ["time", "date", "today", "now", "current", "what day"]
